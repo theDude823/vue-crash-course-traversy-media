@@ -52,7 +52,8 @@ const onSubmit = () => {
     return;
   }
   const newTask = {
-    id: Math.floor(Math.random() * 100000),
+    // unique id gets added by json server so comment next line
+    // id: Math.floor(Math.random() * 100000),
     task: task.value,
     day: day.value,
     reminder: reminder.value,

@@ -7,44 +7,69 @@ import AddTask from "./components/AddTask.vue";
 import { ref, reactive } from "vue";
 
 const showAddTask = ref(false);
-const tasks = ref([
-  {
-    id: "1",
-    text: "Doctors Appointment",
-    day: "March 5th at 2:30pm",
-    reminder: true,
-  },
-  {
-    id: "2",
-    text: "Meeting with boss",
-    day: "March 6th at 1:30pm",
-    reminder: true,
-  },
-  {
-    id: "3",
-    text: "Food shopping",
-    day: "March 7th at 2:00pm",
-    reminder: false,
-  },
-]);
+// fetching from db.json; 2 functions are created but 1 function would do the task just fine
+const tasks = ref("");
+async function created() {
+  tasks.value = await fetchTasks();
+}
+created();
+async function fetchTasks() {
+  const res = await fetch("http://localhost:5000/tasks/");
+  const data = await res.json();
+  return data;
+}
+//function to fetch each task individually:
+
+async function fetchTask(id) {
+  const res = await fetch(`http://localhost:5000/tasks/${id}`);
+  const data = await res.json();
+  return data;
+}
+
 const onClick = () => {
   showAddTask.value = !showAddTask.value;
 };
 
-const xClick = (id) => {
-  // this deletes the selected task
-  tasks.value = tasks.value.filter((task) => task.id !== id);
+const xClick = async (id) => {
+  const res = await fetch(`http://localhost:5000/tasks/${id}`, {
+    method: "DELETE",
+  });
+  //if deleted in backend, remove it in the front end, else show error deleting in backend
+  res.status === 200
+    ? (tasks.value = tasks.value.filter((task) => task.id !== id))
+    : alert("error deleting task");
 };
 
-const checkClick = (id) => {
-  // this changes reminder
+const checkClick = async (id) => {
+  const taskToToggle = await fetchTask(id);
+  const updateTask = { ...taskToToggle, reminder: !taskToToggle.reminder };
+
+  const res = await fetch(`http://localhost:5000/tasks/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-type": "application/json",
+    },
+    body: JSON.stringify(updateTask),
+  });
+
+  const data = await res.json();
   tasks.value = tasks.value.map((task) =>
-    task.id === id ? { ...task, reminder: !task.reminder } : task
+    task.id === id ? { ...task, reminder: data.reminder } : task
   );
 };
-const addTask = (newTask) => {
-  //appends a new task dict to "tasks"
-  tasks.value = [...tasks.value, newTask];
+
+const addTask = async (newTask) => {
+  const res = await fetch("http://localhost:5000/tasks", {
+    method: "POST",
+    headers: {
+      "Content-type": "application/json",
+    },
+    body: JSON.stringify(newTask),
+  });
+  // this gives response of the task we added, from backend:
+  const data = await res.json();
+  //appends a data dict to "tasks"
+  tasks.value = [...tasks.value, data];
 };
 </script>
 
