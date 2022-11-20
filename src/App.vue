@@ -1,14 +1,15 @@
 <script setup>
 // import TheWelcome from "./components/TheWelcome.vue";
 import Header from "./components/Header.vue";
+import Footer from "./components/Footer.vue";
 import Button from "./components/Button.vue";
 import Tasks from "./components/Tasks.vue";
 import AddTask from "./components/AddTask.vue";
 import { ref, reactive } from "vue";
 
+const tasks = ref("");
 const showAddTask = ref(false);
 // fetching from db.json; 2 functions are created but 1 function would do the task just fine
-const tasks = ref("");
 async function created() {
   tasks.value = await fetchTasks();
 }
@@ -74,23 +75,21 @@ const addTask = async (newTask) => {
 </script>
 
 <template>
-  <header>
-    <div
-      class="flex flex-col w-4/5 max-w-md p-10 mx-auto border-2 border-red-400 mt-14"
-    >
-      <div class="flex justify-between">
-        <Header
-          @buttonClick="onClick"
-          :showAddTask="showAddTask"
-          title="Task Tracker"
-        />
-      </div>
-      <AddTask v-show="showAddTask" @addTask_emit="addTask" />
-      <div class="flex-1 w-full bg-gray-400">
-        <Tasks @checkClick="checkClick" @xClick="xClick" :tasks="tasks" />
-      </div>
+  <div
+    class="flex flex-col w-4/5 max-w-md p-10 mx-auto border-2 border-red-400 mt-14"
+  >
+    <div class="flex justify-between">
+      <Header
+        @buttonClick="onClick"
+        :showAddTask="showAddTask"
+        title="Task Tracker"
+      />
     </div>
-  </header>
-
-  <main></main>
+    <AddTask v-show="showAddTask" @addTask_emit="addTask" />
+    <div class="flex-1 w-full bg-gray-400">
+      <Tasks @checkClick="checkClick" @xClick="xClick" :tasks="tasks" />
+    </div>
+    <RouterView></RouterView>
+    <Footer />
+  </div>
 </template>
